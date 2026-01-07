@@ -35,7 +35,7 @@ def create_cotracker3_diagram():
         'TimeAttn': 'Attention thời gian',
         
         # Proxy / Spatial Attention
-        'ProxyAttn': 'Mô đun Attention ảo',
+        'ProxyAttn': 'Attention ảo',
         'P2V': 'Điểm -> Token Ảo',
         'V2V': 'Self-Attn Token Ảo',
         'V2P': 'Token Ảo -> Điểm',
@@ -67,7 +67,8 @@ def create_cotracker3_diagram():
         'e_init_coords': '(Toạ độ khởi tạo)',
         'e_track_feats': 'Đặc trưng điểm',
         'e_local_grid': 'Lưới cục bộ',
-        'e_point_tokens': 'Token điểm'
+        'e_point_tokens': 'Token điểm',
+        'e_recur_state': 'Cập nhật'
     }
 
     # Consistent Color Palette
@@ -163,8 +164,8 @@ def create_cotracker3_diagram():
     dot.edge('Queries', 'Sampler', label=LABELS['e_init_coords'])
     dot.edge('Queries', 'CorrVol')
     
-    # Sampler -> Concat
-    dot.edge('Sampler', 'Concat', label=LABELS['e_track_feats'])
+    # Sampler -> CorrVol (Support Features used in Correlation)
+    dot.edge('Sampler', 'CorrVol', label=LABELS['e_track_feats'])
     
     # Correlation Flow
     dot.edge('CorrVol', 'CorrMLP', label=LABELS['e_local_grid'])
@@ -190,6 +191,7 @@ def create_cotracker3_diagram():
     # Iterative Recurrence (The Loop)
     dot.edge('UpdateState', 'CorrVol', color='blue', style='dashed', constraint='false')
     dot.edge('UpdateState', 'PosEnc', color='blue', style='dashed', constraint='false')
+    dot.edge('UpdateState', 'Concat', label=LABELS['e_recur_state'], color='blue', style='dashed', constraint='false')
 
     # Save and Render
     output_filename = 'cotracker3_architecture'

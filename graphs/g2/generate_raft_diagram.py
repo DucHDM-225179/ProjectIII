@@ -12,7 +12,7 @@ def create_raft_diagram():
     LABELS = {
         'I1': 'Ảnh 1\n(t)',
         'I2': 'Ảnh 2\n(t+1)',
-        'FNet': 'Mạng trích xuất đặc trưng\n(Dạng ResNet)',
+        'FNet': 'Mạng trích xuất đặc trưng',
         'CNet': 'Mạng ngữ cảnh',
         'FMap1': 'Bản đồ đặc trưng 1',
         'FMap2': 'Bản đồ đặc trưng 2',
@@ -28,6 +28,8 @@ def create_raft_diagram():
         'DeltaFlow': 'Độ lệch di dời\n(d_flow)',
         'Flow_Next': 'Ước tính độ di dời\n(k+1)',
         'Sum': 'Cộng',
+        'Upsample': 'Upsample\n',
+        'HighResFlow': '(Độ phân giải gốc)\n',
         
         # Cluster Labels
         'c_inputs': 'Đầu vào',
@@ -35,6 +37,7 @@ def create_raft_diagram():
         'c_features': 'Đặc trưng trung gian',
         'c_corr': 'Trích xuất tương quan',
         'c_update': 'Khối cập nhật lặp lại (GRU)',
+        'c_output': 'Đầu ra',
         
         # Edge Labels
         'e_split': 'Tách',
@@ -47,7 +50,8 @@ def create_raft_diagram():
         'e_hidden_init': '(Khởi tạo)',
         'e_hidden_recur': '(t-1) -> (t)',
         'e_hidden_curr': '(t)',
-        'e_next_iter': 'Lần lặp kế tiếp'
+        'e_next_iter': 'Lần lặp kế tiếp',
+        'e_mask': 'Trọng số'
     }
 
     # Consistent Color Palette
@@ -121,9 +125,13 @@ def create_raft_diagram():
         
         c.node('DeltaFlow', LABELS['DeltaFlow'], fillcolor='#FF6347')
 
-    # 6. Flow Update
-    dot.node('Sum', LABELS['Sum'], shape='circle', width='0.5', fixedsize='true')
-    dot.node('Flow_Next', LABELS['Flow_Next'], fillcolor=COLORS['output'])
+    # 6. Flow Update & Output
+    with dot.subgraph(name='cluster_output') as c:
+        c.attr(label=LABELS['c_output'], color='white', fontname='Arial')
+        c.node('Sum', LABELS['Sum'], shape='circle', width='0.5', fixedsize='true')
+        c.node('Flow_Next', LABELS['Flow_Next'], fillcolor='#90EE90')
+        c.node('Upsample', LABELS['Upsample'], fillcolor='#32CD32')
+        c.node('HighResFlow', LABELS['HighResFlow'], fillcolor='#32CD32', shape='folder')
 
     # --- Edges ---
 
@@ -170,6 +178,11 @@ def create_raft_diagram():
     
     # Loop back (make it go up)
     dot.edge('Flow_Next', 'Flow_Prev', label=LABELS['e_next_iter'], style='dashed', constraint='false')
+
+    # Upsampling
+    dot.edge('FlowHead', 'Upsample', label=LABELS['e_mask'])
+    dot.edge('Flow_Next', 'Upsample')
+    dot.edge('Upsample', 'HighResFlow')
 
     # Save and Render
     dot.save('raft_flow_diagram.dot')

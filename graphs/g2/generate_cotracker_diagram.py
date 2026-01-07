@@ -24,7 +24,7 @@ def create_cotracker_diagram():
         
         # Correlation
         'CorrBlock': 'Khối tương quan',
-        'CorrSamp': 'Lấy mẫu lưới 2D',
+        'CorrSamp': '2D Sampling',
         
         # Transformer Input
         'TokenConcat': 'Nối chập',
@@ -69,7 +69,7 @@ def create_cotracker_diagram():
         'e_proxy': 'Ảo',
         'e_feat_flow': 'Đặc trưng',
         'e_iter': 'Lặp lại',
-        'e_recur': 'Đệ quy'
+        'e_recur': 'Cập nhật'
     }
 
     # Consistent Color Palette
@@ -130,7 +130,7 @@ def create_cotracker_diagram():
         c.node('TimeAttn', LABELS['TimeAttn'], fillcolor=COLORS['trans_block'])
         
         # Proxy / Space Attention Block
-        with dot.subgraph(name='cluster_proxy') as p:
+        with c.subgraph(name='cluster_proxy') as p:
             p.attr(label=LABELS['c_proxy'], color='#9370DB', style='solid', bgcolor='#F5F5F5', margin='10', fontsize='12', fontname='Arial')
             p.node('ProxyInit', LABELS['ProxyInit'], fillcolor=COLORS['proxy'], shape='octagon', width='1.0')
             

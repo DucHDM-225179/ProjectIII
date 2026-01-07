@@ -15,15 +15,16 @@ def create_tapir_initialization_diagram():
         'Video': 'Khung hình Video',
         'QueryPoints': 'Điểm truy vấn\n(t, y, x)',
         'ResNet': 'ResNet Backbone',
-        'FeatureGrid': 'Lưới đặc trưng\n(Nhiều mức phân giải)',
+        'FeatureGrid': 'Đặc trưng\n(Nhiều mức phân giải)',
         'QueryFeat': 'Trích xuất\nĐặc trưng truy vấn',
         'CostVol': 'Tính khối chi phí\n',
         'ConvProc': 'Lớp tích chập\n',
         'Heatmap': 'Bản đồ nhiệt / Softmax',
-        'SoftArgmax': 'Soft Argmax\n',
+        'SoftArgmax': 'Softmax không gian',
         'InitTraj': 'Quỹ đạo ban đầu',
         'InitOcc': 'Điểm bị che ban đầu',
         'InitUnc': 'Độ không chắc chắn ban đầu',
+        'SharedOccLayer': 'Lớp ẩn chung',
         
         # Cluster Labels
         'c_inputs': 'Đầu vào',
@@ -85,6 +86,7 @@ def create_tapir_initialization_diagram():
         c.node('ConvProc', LABELS['ConvProc'], fillcolor=COLORS['conv_proc'])
         c.node('Heatmap', LABELS['Heatmap'], fillcolor=COLORS['heatmap'], fontcolor='white')
         c.node('SoftArgmax', LABELS['SoftArgmax'], fillcolor=COLORS['softmax'], fontcolor='white')
+        c.node('SharedOccLayer', LABELS['SharedOccLayer'], fillcolor='#FF8C00')
 
     # Outputs
     with dot.subgraph(name='cluster_outputs') as c:
@@ -111,10 +113,10 @@ def create_tapir_initialization_diagram():
 
     dot.edge('SoftArgmax', 'InitTraj', label=LABELS['e_decode'])
     
-    # Occlusion/Uncertainty branches from ConvProc/Heatmap area usually, 
-    # but strictly in code it comes from the same Conv block heads
-    dot.edge('ConvProc', 'InitOcc')
-    dot.edge('ConvProc', 'InitUnc')
+    # Occlusion/Uncertainty shared path
+    dot.edge('ConvProc', 'SharedOccLayer')
+    dot.edge('SharedOccLayer', 'InitOcc')
+    dot.edge('SharedOccLayer', 'InitUnc')
 
     # Save
     dot.save('tapir_initialization.dot')
@@ -134,7 +136,7 @@ def create_tapir_refinement_diagram():
         'QueryCtx': 'Đặc trưng truy vấn\n',
         'Sampling': 'Bilinear Sampling\n',
         'SampledFeat': 'Đặc trưng được lấy mẫu',
-        'Concat': 'Nối chập\n(Vị trí, Che, Đặc trưng)',
+        'Concat': 'Nối chập\n(Pos, Occ, Exp, Feat, Corr)',
         'Mixer': 'Bộ trộn PIPS\n(Các khối MLP-Mixer)',
         'Residuals': 'Độ lệch dự đoán\n(dPos, dOcc, dUnc)',
         'Update': 'Cập nhật trạng thái\n',

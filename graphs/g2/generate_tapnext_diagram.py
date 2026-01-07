@@ -11,25 +11,29 @@ def create_tapnext_diagram():
     LABELS = {
         'Video': 'Video',
         'Queries': 'Điểm truy vấn',
-        'Grid': 'Token lưới video\n(+ Mã hoá vị trí)',
-        'Point': 'Token điểm tryt vấn\n(+ Mã hoá vị trí)',
+        'LinProj': 'Chiếu tuyến tính\n(Patch Embed)',
+        'Embedder': 'Tạo Token Truy vấn\n(Mask/Point/Unknown)',
+        'Grid': 'Token Video\n(+ Pos Emb)',
+        'Point': 'Token Truy vấn',
         'Concat': 'Nối chập',
         
-        'TRecViT': 'Khối TRecViT (x12)',
-        'ToTime': 'Sắp xếp theo thời gian\n(B*N, T, C)',
-        'SSM': 'SSM thời gian\n(RG-LRU)',
+        'TRecViT': 'Khối RecurrentGemma\n- Transformer (x12)',
+        'ReshapeTime': 'Reshape\n(B*N, T, C)',
+        'SSM': 'SSM Block\n(RG-LRU)',
         'Hidden': 'Trạng thái ẩn (h_t)',
-        'ToSpace': 'Sắp xếp theo không gian\n(B*T, N, C)',
-        'Attn': 'Attention không gian\n(Self-Attention)',
+        'ReshapeSpace': 'Reshape\n(B*T, N, C)',
+        'Attn': 'Spatial ViT Block\n(Transformer)',
         
-        'Coord': 'Đầu dự đoán toạ độ',
-        'Vis': 'Đầu dự đoán hiển thị',
+        'CoordHead': 'Đầu dự đoán toạ độ',
+        'Logits': 'Logits X, Y',
+        'Softmax': 'Softmax không gian',
+        'VisHead': 'Đầu dự đoán hiển thị',
         'Tracks': 'Quỹ đạo',
         'Visibility': 'Sự hiển thị',
         
         # Cluster Labels
         'c_tokens': 'Token hoá',
-        'c_trecvit': 'Khối TRecViT (x12)',
+        'c_trecvit': 'Khối cập nhật lặp lại',
         'c_outputs': 'Các đầu dự đoán & Đầu ra'
     }
 
@@ -46,7 +50,7 @@ def create_tapnext_diagram():
         'attn': '#32CD32',
         'head': '#FFA500',
         'update': '#90EE90',
-        'output': '#FF4500' # Matches original tapnext output color or use standard green? Original was orange/red. I'll stick to palette: Output green usually. But let's respect this file's flow. Wait, standard is #32CD32 (Green). I will use Green for Tracks/Vis.
+        'output': '#32CD32'
     }
     # Update output colors to match standard
     COLORS['output'] = '#32CD32'
@@ -64,44 +68,56 @@ def create_tapnext_diagram():
     # 2. Token Group
     with dot.subgraph(name='cluster_tokens') as c:
         c.attr(label=LABELS['c_tokens'], color='lightgrey', style='rounded', fontname='Arial')
-        c.node('Grid', LABELS['Grid'], fillcolor=COLORS['encoder'])
-        c.node('Point', LABELS['Point'], fillcolor=COLORS['encoder'])
+        c.node('LinProj', LABELS['LinProj'], fillcolor=COLORS['encoder'])
+        c.node('Embedder', LABELS['Embedder'], fillcolor=COLORS['emb'])
+        c.node('Grid', LABELS['Grid'], fillcolor=COLORS['feat'])
+        c.node('Point', LABELS['Point'], fillcolor=COLORS['feat'])
         c.node('Concat', LABELS['Concat'], shape='diamond', fillcolor='#F08080')
 
     # 3. TRecViT Block
     with dot.subgraph(name='cluster_trecvit') as c:
         c.attr(label=LABELS['c_trecvit'], color='gold', style='bold', penwidth='2', fontname='Arial')
-        c.node('ToTime', LABELS['ToTime'], fillcolor=COLORS['feat'])
+        c.node('ReshapeTime', LABELS['ReshapeTime'], fillcolor=COLORS['feat'])
         c.node('SSM', LABELS['SSM'], fillcolor=COLORS['ssm'])
         c.node('Hidden', LABELS['Hidden'], fillcolor=COLORS['emb'], shape='ellipse')
-        c.node('ToSpace', LABELS['ToSpace'], fillcolor='#98FB98')
+        c.node('ReshapeSpace', LABELS['ReshapeSpace'], fillcolor='#98FB98')
         c.node('Attn', LABELS['Attn'], fillcolor=COLORS['attn'])
         
-        c.edge('ToTime', 'SSM')
-        c.edge('SSM', 'ToSpace')
-        c.edge('ToSpace', 'Attn')
+        c.edge('ReshapeTime', 'SSM')
+        c.edge('SSM', 'ReshapeSpace')
+        c.edge('ReshapeSpace', 'Attn')
 
     # 4. Output Group
     with dot.subgraph(name='cluster_outputs') as c:
         c.attr(label=LABELS['c_outputs'], color='orange', style='rounded', fontname='Arial')
-        c.node('Coord', LABELS['Coord'], fillcolor=COLORS['head'])
-        c.node('Vis', LABELS['Vis'], fillcolor=COLORS['head'])
+        c.node('CoordHead', LABELS['CoordHead'], fillcolor=COLORS['head'])
+        c.node('VisHead', LABELS['VisHead'], fillcolor=COLORS['head'])
+        c.node('Logits', LABELS['Logits'], fillcolor='#FFDAB9')
+        c.node('Softmax', LABELS['Softmax'], fillcolor='#87CEEB')
         c.node('Tracks', LABELS['Tracks'], fillcolor=COLORS['output'])
         c.node('Visibility', LABELS['Visibility'], fillcolor=COLORS['output'])
 
     # --- Edges ---
-    dot.edge('Video', 'Grid')
-    dot.edge('Queries', 'Point')
+    dot.edge('Video', 'LinProj')
+    dot.edge('Queries', 'Embedder')
+    
+    dot.edge('LinProj', 'Grid')
+    dot.edge('Embedder', 'Point')
+    
     dot.edge('Grid', 'Concat')
     dot.edge('Point', 'Concat')
     
-    dot.edge('Concat', 'ToTime')
+    dot.edge('Concat', 'ReshapeTime')
     dot.edge('SSM', 'Hidden', dir='both', style='dashed')
     
-    dot.edge('Attn', 'Coord')
-    dot.edge('Attn', 'Vis')
-    dot.edge('Coord', 'Tracks')
-    dot.edge('Vis', 'Visibility')
+    dot.edge('Attn', 'CoordHead')
+    dot.edge('Attn', 'VisHead')
+    
+    dot.edge('CoordHead', 'Logits')
+    dot.edge('Logits', 'Softmax')
+    dot.edge('Softmax', 'Tracks')
+    
+    dot.edge('VisHead', 'Visibility')
 
     dot_file = 'tapnext_architecture.dot'
     dot.save(dot_file)
