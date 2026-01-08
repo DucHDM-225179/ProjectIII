@@ -29,7 +29,7 @@ def create_tapnext_diagram():
         'Softmax': 'Softmax không gian',
         'VisHead': 'Đầu dự đoán hiển thị',
         'Tracks': 'Quỹ đạo',
-        'Visibility': 'Sự hiển thị',
+        'Visibility': 'Hiển thị',
         
         # Cluster Labels
         'c_tokens': 'Token hoá',

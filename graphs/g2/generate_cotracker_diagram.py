@@ -16,7 +16,7 @@ def create_cotracker_diagram():
         
         # Encoders & Embeddings
         'CNN': 'Mạng CNN',
-        'FMap': 'Bản đồ đặc trưng',
+        'FMap': 'Đặc trưng',
         'TrackFeat': 'Đặc trưng điểm',
         'PosEmb': 'Mã hoá vị trí',
         'TimeEmb': 'Mã hoá thời gian',

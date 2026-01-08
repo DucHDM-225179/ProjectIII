@@ -17,9 +17,9 @@ def create_tapir_initialization_diagram():
         'ResNet': 'ResNet Backbone',
         'FeatureGrid': 'Đặc trưng\n(Nhiều mức phân giải)',
         'QueryFeat': 'Trích xuất\nĐặc trưng truy vấn',
-        'CostVol': 'Tính khối chi phí\n',
+        'CostVol': 'Khối chi phí\n',
         'ConvProc': 'Lớp tích chập\n',
-        'Heatmap': 'Bản đồ nhiệt / Softmax',
+        'Heatmap': 'Bản đồ nhiệt',
         'SoftArgmax': 'Softmax không gian',
         'InitTraj': 'Quỹ đạo ban đầu',
         'InitOcc': 'Điểm bị che ban đầu',
@@ -29,12 +29,12 @@ def create_tapir_initialization_diagram():
         # Cluster Labels
         'c_inputs': 'Đầu vào',
         'c_backbone': 'Trích xuất đặc trưng',
-        'c_costvol': 'Khởi tạo dày đặc',
+        'c_costvol': 'Khởi tạo',
         'c_outputs': 'Đầu ra',
         
         # Edges
         'e_extract': 'Trích xuất đặc trưng',
-        'e_sample': 'Lấy mẫu tại vị trí truy vấn',
+        'e_sample': 'Lấy mẫu bilinear',
         'e_dot': 'Độ tương đồng',
         'e_process': 'Xử lý',
         'e_decode': 'Giải mã'
@@ -132,9 +132,9 @@ def create_tapir_refinement_diagram():
     # --- CONFIGURATION AREA ---
     LABELS = {
         'PrevState': 'Trạng thái trước\n(Vị trí, Che, KCC)',
-        'VideoPyr': 'Đặc trưng Video\n(Pyramid)',
+        'VideoPyr': 'Đặc trưng\n(Pyramid)',
         'QueryCtx': 'Đặc trưng truy vấn\n',
-        'Sampling': 'Bilinear Sampling\n',
+        'Sampling': 'Lấy mẫu bilinear\n',
         'SampledFeat': 'Đặc trưng được lấy mẫu',
         'Concat': 'Nối chập\n(Pos, Occ, Exp, Feat, Corr)',
         'Mixer': 'Bộ trộn PIPS\n(Các khối MLP-Mixer)',
@@ -145,12 +145,12 @@ def create_tapir_refinement_diagram():
         
         # Cluster Labels
         'c_state': 'Trạng thái hiện tại',
-        'c_context': 'Dữ liệu ngữ cảnh',
+        'c_context': 'Đặc trưng hiện tại',
         'c_sampling': 'Trích xuất đặc trưng',
-        'c_mixer': 'Nhân tinh chỉnh',
+        'c_mixer': 'Bộ tinh chỉnh',
         
         # Edges
-        'e_guide': 'Hướng dẫn lấy mẫu',
+        'e_guide': 'Lấy mẫu',
         'e_extract': 'Trích xuất',
         'e_input': 'Đầu vào',
         'e_refine': 'Tinh chỉnh',
